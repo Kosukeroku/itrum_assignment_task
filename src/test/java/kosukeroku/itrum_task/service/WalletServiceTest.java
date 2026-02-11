@@ -41,7 +41,7 @@ class WalletServiceTest {
 
     @BeforeEach
     void setUp() {
-        walletId = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
+        walletId = UUID.fromString("123a4567-b89c-12d3-e456-123456789012");
 
         wallet = new Wallet();
         wallet.setId(walletId);
