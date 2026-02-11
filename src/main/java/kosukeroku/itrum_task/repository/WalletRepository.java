@@ -12,8 +12,7 @@ import java.util.Optional;
 
 public interface WalletRepository extends JpaRepository<Wallet, UUID> {
     @Lock(LockModeType.PESSIMISTIC_WRITE)
-    Optional<Wallet> findById(UUID id); // for operations with balance
-
     @Query("SELECT w FROM Wallet w WHERE w.id = :id")
-    Optional<Wallet> findByIdWithoutBlocking(@Param("id") UUID id); // for reading only
+    Optional<Wallet> findByIdWithLock(@Param("id") UUID id); // for operations with balance
+
 }
