@@ -29,7 +29,7 @@ public class WalletService {
         log.debug("Processing operation: walletId = {}, type = {}, amount = {}",
                 request.getWalletId(), request.getOperationType(), request.getAmount());
 
-        Wallet wallet = walletRepository.findById(request.getWalletId()) //getting a wallet with pessimistic lock
+        Wallet wallet = walletRepository.findByIdWithLock(request.getWalletId()) //getting a wallet with pessimistic lock
                 .orElseThrow(() -> {
                     log.warn("Wallet not found: {}", request.getWalletId());
                     return new WalletNotFoundException(request.getWalletId());
@@ -52,7 +52,7 @@ public class WalletService {
     public WalletResponseDTO getBalance(UUID walletId) {
         log.debug("Getting balance for wallet: {}", walletId);
 
-        Wallet wallet = walletRepository.findByIdWithoutBlocking(walletId) //reading without lock
+        Wallet wallet = walletRepository.findById(walletId) //reading without lock
                 .orElseThrow(() -> {
                     log.warn("Wallet not found: {}", walletId);
                     return new WalletNotFoundException(walletId);
