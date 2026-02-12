@@ -21,12 +21,19 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.*;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.containsString;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -287,4 +294,52 @@ class WalletControllerIntegrationTest {
                 .andExpect(jsonPath("$.path").value("/api/v1/wallets/" + invalidUUID));
     }
 
+    @Test
+    void processOperation_ShouldHandle1000ConcurrentRequests() throws Exception {
+        // given
+        Wallet wallet = new Wallet();
+        wallet.setBalance(BigDecimal.ZERO); // start with zero balance
+        wallet = walletRepository.save(wallet);
+        UUID walletId = wallet.getId();
+
+        int requests = 1000;
+
+        ExecutorService executor = Executors.newFixedThreadPool(requests); // virtual threads would be better, but the task explicitly asks to use java 17
+
+        WalletRequestDTO request = WalletRequestDTO.builder()
+                .walletId(walletId)
+                .operationType(OperationType.DEPOSIT)
+                .amount(new BigDecimal("10.00")) // each thread will deposit 10
+                .build();
+        String requestJson = objectMapper.writeValueAsString(request);
+
+        // when
+        List<CompletableFuture<Void>> futures = new ArrayList<>();
+
+        for (int i = 0; i < requests; i++) {
+            futures.add(CompletableFuture.runAsync(() -> {
+                try {
+                    mockMvc.perform(post("/api/v1/wallet")
+                                    .contentType(MediaType.APPLICATION_JSON)
+                                    .content(requestJson))
+                            .andExpect(status().isOk());
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }, executor));
+        }
+
+        CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
+                .get(30, TimeUnit.SECONDS);
+
+        executor.shutdown();
+        if (!executor.awaitTermination(15, TimeUnit.SECONDS)) {
+            executor.shutdownNow();
+        }
+
+        // then
+        Wallet finalWallet = walletRepository.findById(walletId).orElseThrow();
+        assertThat(finalWallet.getBalance())
+                .isEqualByComparingTo(new BigDecimal(10000)); // resulting amount should be 1000 (number of threads) * 10 (deposit amount) = 10000
+    }
 }
