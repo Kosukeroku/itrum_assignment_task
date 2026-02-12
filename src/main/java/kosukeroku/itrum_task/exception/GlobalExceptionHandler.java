@@ -98,19 +98,4 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
 
-    // 500 other errors
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponseDTO> handleGenericException(Exception ex, HttpServletRequest request) {
-        log.error("Unexpected error: {}", ex.getMessage());
-
-        ErrorResponseDTO response = ErrorResponseDTO.builder()
-                .timestamp(LocalDateTime.now())
-                .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
-                .error("Internal Server Error")
-                .message("An unexpected error occurred")
-                .path(request.getRequestURI())
-                .build();
-
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
-    }
 }
