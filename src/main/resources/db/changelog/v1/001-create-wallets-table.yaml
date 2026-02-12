@@ -1,0 +1,38 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1
+      author: kosukeroku
+      changes:
+        - createTable:
+            tableName: wallets
+            remarks: "Table for storing wallet balances"
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+                  remarks: "Wallet unique identifier"
+              - column:
+                  name: balance
+                  type: DECIMAL(19, 2)
+                  constraints:
+                    nullable: false
+                  defaultValueNumeric: "0.00"
+                  remarks: "Current wallet balance"
+              - column:
+                  name: created_at
+                  type: TIMESTAMP
+                  constraints:
+                    nullable: false
+                  remarks: "Timestamp when wallet was created"
+              - column:
+                  name: updated_at
+                  type: TIMESTAMP
+                  constraints:
+                    nullable: false
+                  remarks: "Timestamp when wallet was last updated"
+      rollback:
+        - dropTable:
+            tableName: wallets
