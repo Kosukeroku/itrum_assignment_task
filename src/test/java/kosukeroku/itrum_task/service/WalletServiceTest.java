@@ -56,7 +56,7 @@ class WalletServiceTest {
     }
 
     @Test
-    void processOperation_ShouldIncreaseBalance_WhenDepositSuccessful() {
+    void processOperation_ShouldIncreaseBalance_WhenDepositIsSuccessful() {
         // given
         WalletRequestDTO request = WalletRequestDTO.builder()
                 .walletId(walletId)
@@ -79,7 +79,7 @@ class WalletServiceTest {
     }
 
     @Test
-    void processOperation_ShouldReduceBalance_WhenWithdrawalSuccessful() {
+    void processOperation_ShouldReduceBalance_WhenWithdrawalIsSuccessful() {
         // given
         WalletRequestDTO request = WalletRequestDTO.builder()
                 .walletId(walletId)
@@ -102,7 +102,7 @@ class WalletServiceTest {
     }
 
     @Test
-    void processOperation_ShouldThrowException_WhenWalletNotFound() {
+    void processOperation_ShouldThrowException_WhenWalletIsNotFound() {
         // given
         WalletRequestDTO request = WalletRequestDTO.builder()
                 .walletId(walletId)
@@ -121,7 +121,7 @@ class WalletServiceTest {
     }
 
     @Test
-    void processOperation_ShouldThrowException_WhenFundsInsufficient() {
+    void processOperation_ShouldThrowException_WhenFundsAreInsufficient() {
         // given
         WalletRequestDTO request = WalletRequestDTO.builder()
                 .walletId(walletId)
@@ -159,7 +159,7 @@ class WalletServiceTest {
     }
 
     @Test
-    void getBalance_ShouldThrowException_WhenWalletNotFound() {
+    void getBalance_ShouldThrowException_WhenWalletIsNotFound() {
         // given
         when(walletRepository.findById(walletId)).thenReturn(Optional.empty());
 
