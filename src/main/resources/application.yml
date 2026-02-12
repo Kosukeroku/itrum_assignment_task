@@ -3,13 +3,13 @@ spring:
     name: itrum-task
 
   datasource:
-    url: jdbc:postgresql://localhost:5433/wallet_db
-    username: wallet_user
-    password: wallet_pass
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5433/wallet_db}
+    username: ${SPRING_DATASOURCE_USERNAME:wallet_user}
+    password: ${SPRING_DATASOURCE_PASSWORD:wallet_pass}
     driver-class-name: org.postgresql.Driver
 
     hikari:
-      maximum-pool-size: 1000
+      maximum-pool-size: ${DB_MAX_POOL_SIZE:1000}
 
   jpa:
     hibernate:
@@ -29,7 +29,7 @@ spring:
     change-log: classpath:db/changelog/db.changelog-master.yaml
 
 server:
-  port: 8081
+  port: ${SERVER_PORT:8081}
 
 logging:
   level:
